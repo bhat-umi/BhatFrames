@@ -24,4 +24,3 @@ async def create_emp(emp: Create_Emp,db:AsyncSession = Depends(get_db)):
 async def login_emp(emp:Login_Emp,db:AsyncSession = Depends(get_db)):
     token = await users_service.login_emp(emp,db)
     return token
-    

@@ -8,6 +8,10 @@ class Settings(BaseSettings):
     DATABASE_PASSWORD: str = Field(default=None)
     DATABASE_HOST: str = Field(default=None)
     DATABASE_PORT: int = None
+    SECRET_KEY: str = Field(default=None)
+    ALGORITHM: str = Field(default=None)
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=None)
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = Field(default=None)
     
 
     model_config = SettingsConfigDict(

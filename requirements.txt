@@ -6,3 +6,5 @@ sqlalchemy
 pydantic-settings
 asyncpg
 passlib
+pyjwt
+jwt

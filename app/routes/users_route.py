@@ -1,11 +1,21 @@
-from fastapi import APIRouter
+from fastapi import APIRouter,Depends,HTTPException,status
+from app.schemas.user_schema import Create_Emp
+from app.services import users_service
+from app.database.init_db import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter(
     prefix="/users",
     tags=["users"],
 )
 
-@router.get("/users")
-async def get_users():
-    return {"message": "Hello World"}
 
+
+@router.post("/create_emp")
+async def create_emp(emp: Create_Emp,db:AsyncSession = Depends(get_db)):
+    employee = await users_service.create_emp(emp,db)
+    if employee:
+        raise HTTPException(status_code=status.HTTP_201_CREATED,detail="Employee created successfully")
+    else:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="Employee not created")
+    
 

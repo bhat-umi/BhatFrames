@@ -7,7 +7,6 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-   
     print("startup")
     async with engine.begin() as conn:
         await conn.run_sync(base.metadata.create_all)

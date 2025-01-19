@@ -7,7 +7,7 @@ base = declarative_base()
 
 DATABASE_URL = f"postgresql+asyncpg://{settings.DATABASE_USER}:{settings.DATABASE_PASSWORD}@{settings.DATABASE_HOST}:{settings.DATABASE_PORT}/{settings.DATABASE_NAME}"
 
-print("DATABASE_URL:", DATABASE_URL)
+
 
 engine = create_async_engine(
     DATABASE_URL,

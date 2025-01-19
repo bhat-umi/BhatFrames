@@ -54,3 +54,16 @@ async def login_emp(emp:Login_Emp, db: AsyncSession):
         "refresh_token": refresh_token,
         "token_type": "bearer",
     }
+    
+    
+async def get_employee_name(emp_id,db: AsyncSession):
+    query = select(Employee.emp_name).where(Employee.emp_id == emp_id)
+    result = await db.execute(query)
+    employee_name = result.scalar()
+    if employee_name:
+        return {"emp_name": employee_name}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )

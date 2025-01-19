@@ -1,11 +1,10 @@
 import jwt 
 from datetime import datetime, timedelta
 from app.core.config import settings
+from fastapi import HTTPException, status
 
 
-print(settings.SECRET_KEY)
-print(settings.ALGORITHM)
-print(settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
 
 def create_access_token(emp_id:str, role: str):
     
@@ -26,3 +25,11 @@ def create_refresh_token(emp_id:str,role:str):
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     
+def verify_token(token: str):
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")

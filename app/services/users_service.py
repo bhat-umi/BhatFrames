@@ -32,9 +32,25 @@ async def login_emp(emp:Login_Emp, db: AsyncSession):
     query = select(Employee).where(Employee.emp_id == emp.emp_id)
     result = await db.execute(query)
     emp_obj = result.scalar_one_or_none()
-    if emp and Hasher.verify_password(emp.password, emp_obj.password): 
-        access_token = create_access_token(emp_obj.emp_id, emp_obj.role.value)
-        refresh_token = create_refresh_token(emp_obj.emp_id, emp_obj.role.value)
-        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
-    else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid credentials")
+
+
+    if not emp_obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found"
+        )
+        
+    if not Hasher.verify_password(emp.password, emp_obj.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password"
+        )
+
+    access_token = create_access_token(emp_obj.emp_id, emp_obj.role.value)
+    refresh_token = create_refresh_token(emp_obj.emp_id, emp_obj.role.value)
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }

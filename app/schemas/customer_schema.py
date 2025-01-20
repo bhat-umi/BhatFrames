@@ -13,3 +13,4 @@ class Create_Customer(BaseModel):
     customer_last_name: str
     customer_address: str
     customer_contact: str
+    balance:int

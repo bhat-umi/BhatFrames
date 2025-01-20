@@ -14,6 +14,10 @@ class Customer(base):
     customer_last_name = Column(String)
     customer_address = Column(String)
     customer_contact = Column(String, index=True, unique=True)
+    balance = Column(Integer)
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     updated_at = Column(DateTime)
+    
+    
+    

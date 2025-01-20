@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.users_route import router as users_router
+from app.routes.customers_route import router as customers_router
 from app.database.base import base,engine
 from app.database.init_db import get_db
 from contextlib import asynccontextmanager
@@ -38,3 +39,4 @@ app.add_middleware(
 
 
 app.include_router(users_router)
+app.include_router(customers_router)

@@ -11,10 +11,13 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
         query = select(Customer).where(
             Customer.customer_contact == request.contact
         )
+        
         result = await db.execute(query)
-        existing_customer = result.scalar_one_or_none()
-
-        if existing_customer:
+        print("result is ", result)
+        existing_customer = result.scalars().all()
+        
+        print("existing_customer is ", existing_customer)
+        if len(existing_customer) > 0:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Customer with this contact number already exists",

@@ -27,6 +27,7 @@ async def create_customer(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"message": "Invalid token"}
             )
+        
 
         customer = await customer_service.create_customer(request, db)
         return JSONResponse(

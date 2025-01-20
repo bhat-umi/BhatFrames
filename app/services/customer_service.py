@@ -22,10 +22,10 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
 
         new_customer = Customer(
             title=Title(request.title.value),
-            customer_first_name=request.customer_first_name,
-            customer_last_name=request.customer_last_name,
-            customer_address=request.customer_address,
-            customer_contact=request.customer_contact,
+            customer_first_name=request.fname,
+            customer_last_name=request.lname,
+            customer_address=request.address,
+            customer_contact=request.contact,
             balance=request.balance,
             created_at=datetime.now(),
             updated_at=datetime.now(),

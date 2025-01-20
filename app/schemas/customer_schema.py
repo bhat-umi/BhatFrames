@@ -9,8 +9,8 @@ class Title(Enum):
 
 class Create_Customer(BaseModel):
     title: Title
-    customer_first_name: str
-    customer_last_name: str
-    customer_address: str
-    customer_contact: str
+    fname: str
+    lname: str
+    address: str
+    contact: str
     balance:int

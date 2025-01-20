@@ -9,7 +9,7 @@ from fastapi import HTTPException, status
 async def create_customer(request: Create_Customer, db: AsyncSession):
     try:
         query = select(Customer).where(
-            Customer.customer_contact == request.customer_contact
+            Customer.customer_contact == request.contact
         )
         result = await db.execute(query)
         existing_customer = result.scalar_one_or_none()

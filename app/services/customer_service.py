@@ -2,8 +2,9 @@ from datetime import datetime
 from app.models.customer_model import Customer, Title
 from app.schemas.customer_schema import Create_Customer
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from fastapi import HTTPException, status
+import math
 
 async def create_customer(request: Create_Customer, db: AsyncSession):
     try:
@@ -51,9 +52,17 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
         )
 
 
-async def read_customers(db: AsyncSession):
+async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10):
     try:
-        query = select(Customer).order_by(Customer.created_at.desc())
+        # Calculate offset
+        offset = (page - 1) * limit
+        
+        # Get total count
+        count_query = select(func.count()).select_from(Customer)
+        total_count = await db.scalar(count_query)
+        
+        # Get paginated customers
+        query = select(Customer).order_by(Customer.created_at.desc()).offset(offset).limit(limit)
         result = await db.execute(query)
         customers = result.scalars().all()
         
@@ -76,8 +85,14 @@ async def read_customers(db: AsyncSession):
             }
             for customer in customers
         ]
-            
-        return customers_list
+        
+        return {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "total_pages": math.ceil(total_count / limit),
+            "data": customers_list
+        }
         
     except HTTPException:
         raise

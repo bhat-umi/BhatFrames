@@ -30,6 +30,7 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
             customer_last_name=request.lname,
             customer_address=request.address,
             customer_contact=request.contact,
+            balance=request.balance,
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
@@ -79,6 +80,7 @@ async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10):
                 "customer_first_name": customer.customer_first_name,
                 "customer_last_name": customer.customer_last_name,
                 "customer_address": customer.customer_address,
+                "balance": customer.balance,
                 "customer_contact": customer.customer_contact,
                 "created_at": customer.created_at.isoformat(),
                 "updated_at": customer.updated_at.isoformat()
@@ -100,4 +102,66 @@ async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch customers"
+        )
+
+
+async def search_customers(db: AsyncSession, query: str, page: int = 1, limit: int = 10):
+    try:
+        # Calculate offset
+        offset = (page - 1) * limit
+
+        # Get total count
+        count_query = select(func.count()).select_from(Customer).where(
+            (Customer.customer_first_name.ilike(f"%{query}%")) |
+            (Customer.customer_last_name.ilike(f"%{query}%")) |
+            (Customer.customer_contact.ilike(f"%{query}%"))
+        )
+        total_count = await db.scalar(count_query)
+
+        # Get paginated customers
+        query = select(Customer).where(
+            (Customer.customer_first_name.ilike(f"%{query}%")) |
+            (Customer.customer_last_name.ilike(f"%{query}%")) |
+            (Customer.customer_contact.ilike(f"%{query}%"))
+        ).order_by(Customer.created_at.desc()).offset(offset).limit(limit)
+        result = await db.execute(query)
+        customers = result.scalars().all()
+        if not customers:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No customers found"
+            )
+
+        customers_list = [
+            {
+                "customer_id": customer.customer_id,
+                "title": customer.title.value,
+                "customer_first_name": customer.customer_first_name,
+                "customer_last_name": customer.customer_last_name,
+                "customer_address": customer.customer_address,
+                "customer_contact": customer.customer_contact,
+                "balance": customer.balance,
+                "created_at": customer.created_at.isoformat(),
+                "updated_at": customer.updated_at.isoformat()
+            }
+            for customer in customers
+        ]
+
+        return {
+            "total": total_count,
+            "page": page,
+            "limit": limit,
+            "total_pages": math.ceil(total_count / limit),
+            "data": customers_list
+        }
+
+    except HTTPException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No customers found"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch customers",
         )

@@ -81,3 +81,30 @@ async def read_customers(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": "Internal server error occurred"}
         )
+        
+        
+@router.get("/search")
+async def search_customers(
+    authorization: str = Header(...),
+    search_query: str = Query(..., min_length=3),
+    db: AsyncSession = Depends(get_db)):
+    try:
+        token = authorization.split(" ")[1]
+        token_data = verify_token(token)
+        if not token_data:
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"message": "Invalid token"})
+        customers = await customer_service.search_customers(db, search_query)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=customers
+        )
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
+    except Exception as e:
+        print("error", e)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": "Internal server error occurred"},
+        )

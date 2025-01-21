@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.post("/create_emp")
-async def create_emp(emp: Create_Emp,db:AsyncSession = Depends(get_db)):
+async def create_emp(emp: Create_Emp,db:AsyncSession = Depends(get_db),):
     employee = await users_service.create_emp(emp,db)
     if employee:
         raise HTTPException(status_code=status.HTTP_201_CREATED,detail="Employee created successfully")

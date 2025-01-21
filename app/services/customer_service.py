@@ -49,3 +49,40 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process customer creation"
         )
+
+
+async def read_customers(db: AsyncSession):
+    try:
+        query = select(Customer).order_by(Customer.created_at.desc())
+        result = await db.execute(query)
+        customers = result.scalars().all()
+        
+        if not customers:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="No customers found"
+            )
+            
+        customers_list = [
+            {
+                "customer_id": customer.customer_id,
+                "title": customer.title.value,
+                "customer_first_name": customer.customer_first_name,
+                "customer_last_name": customer.customer_last_name,
+                "customer_address": customer.customer_address,
+                "customer_contact": customer.customer_contact,
+                "created_at": customer.created_at.isoformat(),
+                "updated_at": customer.updated_at.isoformat()
+            }
+            for customer in customers
+        ]
+            
+        return customers_list
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch customers"
+        )

@@ -118,8 +118,8 @@ async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10, sort_
             "data": customers_list
         }
         
-    except HTTPException:
-        raise
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

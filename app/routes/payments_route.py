@@ -30,9 +30,11 @@ async def create_payment(
         new_payment = await payment_service.create_payment(db, emp_id, request)
        
         if new_payment:
-            raise HTTPException(
+            return JSONResponse(
                 status_code=status.HTTP_201_CREATED,
-                detail="Payment created successfully",
+                content={
+                    "message": "Payment created successfully",
+                },
             )
         else:
             raise HTTPException(

@@ -54,17 +54,36 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
         )
 
 
-async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10):
+async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10, sort_by: str = None, filter_by: str = None):
     try:
-        # Calculate offset
         offset = (page - 1) * limit
         
-        # Get total count
-        count_query = select(func.count()).select_from(Customer)
+        # Base query
+        query = select(Customer)
+        
+        # Apply filters
+        if filter_by == "with_balance":
+            query = query.where(Customer.balance != 0)
+            
+        # Apply sorting
+        if sort_by:
+            if sort_by == "a-z":
+                query = query.order_by(Customer.customer_first_name.asc())
+            elif sort_by == "z-a":
+                query = query.order_by(Customer.customer_first_name.desc())
+            elif sort_by == "balance_low_high":
+                query = query.order_by(Customer.balance.asc())
+            elif sort_by == "balance_high_low":
+                query = query.order_by(Customer.balance.desc())
+        else:
+            query = query.order_by(Customer.created_at.desc())
+            
+        # Get total count with filters
+        count_query = select(func.count()).select_from(query.subquery())
         total_count = await db.scalar(count_query)
         
-        # Get paginated customers
-        query = select(Customer).order_by(Customer.created_at.desc()).offset(offset).limit(limit)
+        # Apply pagination
+        query = query.offset(offset).limit(limit)
         result = await db.execute(query)
         customers = result.scalars().all()
         

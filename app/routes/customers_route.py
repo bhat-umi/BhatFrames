@@ -53,18 +53,36 @@ async def create_customer(
             content={"message": "Internal server error occurred"}
         )
 
+from enum import Enum
+from fastapi import Query
+
+class SortOptions(str, Enum):
+    AZ = "a-z"
+    ZA = "z-a"
+    BALANCE_LOW_HIGH = "balance_low_high"
+    BALANCE_HIGH_LOW = "balance_high_low"
+
+class FilterOptions(str, Enum):
+    ALL = "all"
+    WITH_BALANCE = "with_balance"
+
 @router.get("/read")
 async def read_customers(
-    
     page: int = Query(default=1, gt=0),
     limit: int = Query(default=10, gt=0),
+    sort_by: SortOptions = Query(default=None),
+    filter_by: FilterOptions = Query(default="all"),
     token_data: dict = Depends(verify_auth_token),
     db: AsyncSession = Depends(get_db)
 ):
     try:
-       
-            
-        customers = await customer_service.read_customers(db, page, limit)
+        customers = await customer_service.read_customers(
+            db, 
+            page, 
+            limit, 
+            sort_by=sort_by.value if sort_by else None,
+            filter_by=filter_by.value
+        )
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content=customers
@@ -75,8 +93,7 @@ async def read_customers(
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": "Internal server error occurred"}
-        )
-        
+        )        
         
 @router.get("/search")
 async def search_customers(

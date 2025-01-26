@@ -72,9 +72,9 @@ async def read_customers(db: AsyncSession, page: int = 1, limit: int = 10, sort_
             elif sort_by == "name-desc":
                 query = query.order_by(Customer.customer_first_name.desc())
             elif sort_by == "balance-high":
-                query = query.order_by(Customer.balance.asc())
-            elif sort_by == "balance-low":
                 query = query.order_by(Customer.balance.desc())
+            elif sort_by == "balance-low":
+                query = query.order_by(Customer.balance.asc())
             elif sort_by == "recently-added":
                 query = query.order_by(Customer.created_at.desc())
         else:

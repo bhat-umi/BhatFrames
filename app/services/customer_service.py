@@ -187,3 +187,46 @@ async def search_customers(db: AsyncSession, query: str, page: int = 1, limit: i
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch customers",
         )
+
+
+async def update_customer(customer_id: int, request: Create_Customer, db: AsyncSession):
+    try:
+        # Check if customer exists
+        query = select(Customer).where(Customer.customer_id == customer_id)
+        result = await db.execute(query)
+        customer = result.scalar_one_or_none()
+
+        if not customer:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Customer not found"
+            )
+        query = select(Customer).where(Customer.customer_contact == request.contact)
+        result = await db.execute(query)
+        customer_contact = result.scalar_one_or_none()
+        if customer_contact and customer_contact.customer_id != customer_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Contact already exists")
+        
+        customer.title = Title(request.title.value)
+        customer.customer_first_name = request.fname
+        customer.customer_last_name = request.lname
+        customer.customer_address = request.address
+        customer.customer_contact = request.contact
+        customer.balance = request.balance
+        customer.updated_at = datetime.now()
+
+        await db.commit()
+        await db.refresh(customer)
+
+        return customer
+    except HTTPException:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found"
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update customer"
+        )

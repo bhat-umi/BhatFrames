@@ -115,3 +115,31 @@ async def search_customers(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"message": "Internal server error occurred"},
         )
+
+
+@router.put("/update/{customer_id}")
+async def update_customer(
+    customer_id: int,
+    request: Create_Customer,
+    db: AsyncSession = Depends(get_db),
+    token_data: dict = Depends(verify_auth_token)):
+    try:
+        updated_customer = await customer_service.update_customer(customer_id, request, db)
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={
+                "message": "Customer updated successfully",
+                "data": {
+                    "customer_id": updated_customer.customer_id,
+                    "customer_name": f"{updated_customer.customer_first_name} {updated_customer.customer_last_name}"
+                }
+            }
+        )
+    except HTTPException as e:
+        return JSONResponse(status_code=e.status_code, content={"message": e.detail})
+    except Exception as e:
+        print("error", e)
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"message": "Internal server error occurred"},
+        )

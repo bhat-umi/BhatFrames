@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey,Enum as SQL_Enum
 from app.database.base import base
 from enum import Enum
+from sqlalchemy.orm import relationship
+
 
 class UserRole(Enum):
     ADMIN = "admin"
@@ -13,3 +15,4 @@ class Employee(base):
     emp_name = Column(String(100), index=True, nullable=False)
     password = Column(String(255), nullable=False)
     role = Column(SQL_Enum(UserRole), default=UserRole.USER.value)
+    payments = relationship("Payment", back_populates="employee")

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum as SQLALchemyEnum
 from app.database.base import base
 from enum import Enum
+from sqlalchemy.orm import relationship
 
 class Title(Enum):
     Mr = "Mr"    # Match exact database enum values
@@ -18,5 +19,6 @@ class Customer(base):
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     
+    payments = relationship("Payment", back_populates="customer")
     
     

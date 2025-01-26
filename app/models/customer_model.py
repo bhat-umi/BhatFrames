@@ -3,8 +3,8 @@ from app.database.base import base
 from enum import Enum
 
 class Title(Enum):
-    MR = "Mr"
-    MS = "Ms"
+    Mr = "Mr"    # Match exact database enum values
+    Ms = "Ms"    # Match exact database enum values
 
 class Customer(base):
     __tablename__ = "customer"
@@ -16,7 +16,6 @@ class Customer(base):
     customer_contact = Column(String, index=True, unique=True)
     balance = Column(Integer)
     created_at = Column(DateTime)
-    updated_at = Column(DateTime)
     updated_at = Column(DateTime)
     
     

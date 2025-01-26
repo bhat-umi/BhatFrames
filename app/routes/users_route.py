@@ -5,6 +5,8 @@ from app.database.init_db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.schemas.token_schema import Token
 from app.core.tokens import verify_token
+from app.core.auth import verify_auth_token
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(
     prefix="/users",
@@ -23,7 +25,10 @@ async def create_emp(emp: Create_Emp,db:AsyncSession = Depends(get_db),):
     
 
 @router.post("/login", response_model=Token)
-async def login_emp(emp: Login_Emp, db: AsyncSession = Depends(get_db)):
+async def login_emp(
+    emp: Login_Emp,
+    db: AsyncSession = Depends(get_db)
+):
     try:
         token_data = await users_service.login_emp(emp, db)
         return token_data
@@ -34,16 +39,36 @@ async def login_emp(emp: Login_Emp, db: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error occurred"
         )
+        
+@router.post("/login/token", response_model=Token)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db)
+):
+    try:
+        login_data = Login_Emp(
+            emp_id=form_data.username,
+            password=form_data.password
+        )
+        token_data = await users_service.login_emp(login_data, db)
+        return token_data
+    except HTTPException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error occurred"
+        )
+
 
 @router.get("/get_employee_name")
 async def get_employee_name(
     
-    authorization: str = Header(...),
+    token_data: dict = Depends(verify_auth_token),
     db: AsyncSession = Depends(get_db)
 ):
 
-    token = authorization.split(" ")[1]  # Extract token from "Bearer <token>"
-    token_data = verify_token(token)
+    
     
     
     emp_id = token_data.get("emp_id")

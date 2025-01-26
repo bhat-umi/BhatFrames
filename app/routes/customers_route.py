@@ -5,7 +5,7 @@ from app.services import customer_service
 from app.database.init_db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.tokens import verify_token
-
+from app.core.auth import verify_auth_token
 
 router = APIRouter(
     prefix="/customers",
@@ -16,12 +16,12 @@ router = APIRouter(
 @router.post("/create")
 async def create_customer(
     request: Create_Customer,
-    authorization: str = Header(...), 
-    db: AsyncSession = Depends(get_db)
+
+    db: AsyncSession = Depends(get_db),
+    token_data: dict = Depends(verify_auth_token),
 ):
     try:
-        token = authorization.split(" ")[1]
-        token_data = verify_token(token)
+        
         if not token_data:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -24,6 +24,7 @@ async def create_customer(request: Create_Customer, db: AsyncSession):
             )
         
         # Create new customer if no duplicate found
+        print("Request:",request.model_dump())
         new_customer = Customer(
             title=Title(request.title.value),
             customer_first_name=request.fname,

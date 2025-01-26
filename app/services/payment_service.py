@@ -41,3 +41,70 @@ async def create_payment(db: AsyncSession, emp_id: str, payment_data: PaymentCre
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+async def read_payments(
+   db: AsyncSession, page: int = 1, limit: int = 10, sort_by: str = None, filter_by: str = None):
+    try:
+        # Calculate the offset based on the page and limit
+        offset = (page - 1) * limit
+        # Construct the base query
+        query = select(Payment).offset(offset).limit(limit)
+        # Apply sorting if provided
+        if sort_by:
+            if sort_by == "recently-added":
+                query = query.order_by(Payment.created_at.desc())
+            elif sort_by == "date-asc":
+                query = query.order_by(Payment.payment_date.asc())
+            elif sort_by == "date-desc":
+                query = query.order_by(Payment.payment_date.desc())
+            elif sort_by == "amount-asc":
+                query = query.order_by(Payment.payment_amount.asc())
+            elif sort_by == "amount-desc":
+                query = query.order_by(Payment.payment_amount.desc())
+            else:
+                raise HTTPException(
+                    status_code=400, detail="Invalid sort_by parameter"
+                )
+        else:
+                query = query.order_by(Payment.payment_date.desc())
+        # Apply filtering if provided
+        if filter_by:
+            if filter_by == "cash-payment":
+                query = query.where(Payment.payment_method == PaymentMethod.CASH)
+            elif filter_by == "card-payment":
+                query = query.where(Payment.payment_method == PaymentMethod.CARD)
+        else:
+                query = query.where(Payment.payment_method == PaymentMethod.CASH)
+        
+        # Execute the query and fetch the results
+        result = await db.execute(query)
+        payments = result.scalars().all()
+        # Calculate the total count of payments
+        total_count = await db.scalar(select(func.count()).select_from(Payment))
+        # Calculate the total pages
+        total_pages = (total_count + limit - 1) // limit
+        
+        
+        payments_list = [
+            {
+                "payment_id": payment.payment_id,
+                "customer_id": payment.customer_id,
+                "payment_amount": payment.payment_amount,
+                "payment_method": payment.payment_method.value,
+                "payment_uid": payment.payment_uid,
+                "comments": payment.comments,
+                "payment_date": payment.payment_date,
+                "created_at": payment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "updated_at": payment.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+            }
+            for payment in payments
+        ]
+        return {
+            "payments": payments_list,
+            "total_pages": total_pages,
+            "current_page": page,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -30,7 +30,7 @@ class Payment(base):
     employee_id = Column(String, ForeignKey('employee.emp_id'), index=True)
     payment_amount = Column(Integer)
     payment_method = Column(SQLALchemyEnum(PaymentMethod), index=True)
-    payment_uid = Column(String, index=True, unique=True)
+    payment_uid = Column(String, index=True)
     comments = Column(String)
     payment_date = Column(Date, index=True)  # Changed to Date type
     created_at = Column(DateTime(timezone=True))

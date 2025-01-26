@@ -55,19 +55,14 @@ async def create_customer(
 
 @router.get("/read")
 async def read_customers(
-    authorization: str = Header(...),
+    
     page: int = Query(default=1, gt=0),
     limit: int = Query(default=10, gt=0),
+    token_data: dict = Depends(verify_auth_token),
     db: AsyncSession = Depends(get_db)
 ):
     try:
-        token = authorization.split(" ")[1]
-        token_data = verify_token(token)
-        if not token_data:
-            return JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"message": "Invalid token"}
-            )
+       
             
         customers = await customer_service.read_customers(db, page, limit)
         return JSONResponse(
@@ -85,16 +80,10 @@ async def read_customers(
         
 @router.get("/search")
 async def search_customers(
-    authorization: str = Header(...),
+    token_data: dict = Depends(verify_auth_token),
     search_query: str = Query(..., min_length=3),
     db: AsyncSession = Depends(get_db)):
     try:
-        token = authorization.split(" ")[1]
-        token_data = verify_token(token)
-        if not token_data:
-            return JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"message": "Invalid token"})
         customers = await customer_service.search_customers(db, search_query)
         return JSONResponse(
             status_code=status.HTTP_200_OK,

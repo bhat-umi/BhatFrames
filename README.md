@@ -7,7 +7,7 @@ For Running the server
 
 ```
 
-Droping Database 
+**Droping Database** 
 
 ```
 \c postgres

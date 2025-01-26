@@ -95,7 +95,7 @@ async def read_payments(
                 "payment_method": payment.payment_method.value,
                 "payment_uid": payment.payment_uid,
                 "comments": payment.comments,
-                "payment_date": payment.payment_date,
+                "payment_date": payment.payment_date.strftime("%Y-%m-%d %H:%M:%S"),
                 "created_at": payment.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                 "updated_at": payment.updated_at.strftime("%Y-%m-%d %H:%M:%S"),
             }

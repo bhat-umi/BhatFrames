@@ -40,7 +40,7 @@ async def create_payment(
                 detail="Failed to create payment",
             )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 class SortOptions(str, Enum):

@@ -57,10 +57,11 @@ from enum import Enum
 from fastapi import Query
 
 class SortOptions(str, Enum):
-    AZ = "a-z"
-    ZA = "z-a"
-    BALANCE_LOW_HIGH = "balance_low_high"
-    BALANCE_HIGH_LOW = "balance_high_low"
+    AZ = "name-asc"
+    ZA = "name-desc"
+    BALANCE_LOW_HIGH = "balance-high"
+    BALANCE_HIGH_LOW = "balance-low"
+    RECENTLY_ADDED = "recently-added"
 
 class FilterOptions(str, Enum):
     ALL = "all"
@@ -70,7 +71,7 @@ class FilterOptions(str, Enum):
 async def read_customers(
     page: int = Query(default=1, gt=0),
     limit: int = Query(default=10, gt=0),
-    sort_by: SortOptions = Query(default=None),
+    sort_by: SortOptions = Query(default='recently-added'),
     filter_by: FilterOptions = Query(default="all"),
     token_data: dict = Depends(verify_auth_token),
     db: AsyncSession = Depends(get_db)

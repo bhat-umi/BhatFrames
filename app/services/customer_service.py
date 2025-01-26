@@ -201,10 +201,16 @@ async def update_customer(customer_id: int, request: Create_Customer, db: AsyncS
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Customer not found"
             )
-        query = select(Customer).where(Customer.customer_contact == request.contact)
+        query = (
+            select(Customer)
+            .where(Customer.customer_contact == request.contact) & (
+                Customer.customer_id != customer_id
+            )
+            
+        )
         result = await db.execute(query)
         customer_contact = result.scalar_one_or_none()
-        if customer_contact and customer_contact.customer_id != customer_id:
+        if customer_contact:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Contact already exists")
